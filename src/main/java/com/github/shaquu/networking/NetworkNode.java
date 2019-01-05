@@ -9,6 +9,7 @@ import com.github.shaquu.networking.udp.IpPort;
 
 public abstract class NetworkNode extends ListenerManager {
 
+    protected final int port;
     protected Logger logger = new Logger();
 
     private Thread receiverThread;
@@ -16,8 +17,13 @@ public abstract class NetworkNode extends ListenerManager {
     private PacketManager packetManager;
     private FileManager fileManager;
 
-    protected NetworkNode() {
-        fileManager = new FileManager();
+    private String folderPath;
+
+    protected NetworkNode(int port, String folderPath) {
+        this.port = port;
+        this.folderPath = folderPath;
+
+        fileManager = new FileManager(this, folderPath);
         packetManager = new PacketManager();
 
         receiverThread = new Thread(() -> {
@@ -54,7 +60,7 @@ public abstract class NetworkNode extends ListenerManager {
 
     public abstract void addPacketToQueue(IpPort ipPort, Packet packet) throws Exception;
 
-    public abstract void addPacketToQueue(Packet packet);
+    public abstract void addPacketToQueue(Packet packet) throws Exception;
 
     public FileManager getFileManager() {
         return fileManager;
@@ -62,6 +68,10 @@ public abstract class NetworkNode extends ListenerManager {
 
     public PacketManager getPacketManager() {
         return packetManager;
+    }
+
+    public String getFolderPath() {
+        return folderPath;
     }
 
     public Logger getLogger() {

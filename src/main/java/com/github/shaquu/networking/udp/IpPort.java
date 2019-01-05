@@ -11,11 +11,20 @@ public class IpPort {
         this.port = port;
     }
 
-    public InetAddress getIp() {
+    InetAddress getIp() {
         return ip;
     }
 
-    public int getPort() {
+    int getPort() {
         return port;
+    }
+
+
+    @Override
+    public String toString() {
+        return "IpPort{" +
+                "ip=" + ip.getHostName() +
+                ", port=" + port +
+                '}';
     }
 }

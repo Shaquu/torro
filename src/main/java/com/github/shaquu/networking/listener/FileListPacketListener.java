@@ -36,7 +36,7 @@ public class FileListPacketListener implements Listener {
 
             List<TorroFile> fileList = (ArrayList<TorroFile>) Packet.fromBytes(allBytes);
 
-            networkNode.getLogger().log(Arrays.toString(fileList.toArray()));
+            networkNode.getLogger().debug(Arrays.toString(fileList.toArray()));
         }
     }
 }

@@ -1,8 +1,7 @@
 package com.github.shaquu;
 
-import com.github.shaquu.file.TorroFile;
-import com.github.shaquu.networking.packets.Packet;
-import com.github.shaquu.networking.packets.RequestFileListPacket;
+import com.github.shaquu.controller.ConsoleController;
+import com.github.shaquu.logger.Logger;
 import com.github.shaquu.networking.udp.IpPort;
 import com.github.shaquu.networking.udp.UDPClientServer;
 
@@ -16,6 +15,8 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
 
+        Logger.DEBUG = true;
+
         int myPort;
         int hisPort;
 
@@ -27,15 +28,10 @@ public class Main {
             hisPort = ports[0];
         }
 
-        System.out.println(myPort);
-        System.out.println(hisPort);
-
-        IpPort[] ipPorts = new IpPort[]{new IpPort(InetAddress.getByName("localhost"), hisPort)};
-
         UDPClientServer udpClientServer;
 
         try {
-            udpClientServer = new UDPClientServer(myPort);
+            udpClientServer = new UDPClientServer(myPort, "" + myPort);
         } catch (SocketException e) {
             e.printStackTrace();
             return;
@@ -43,18 +39,11 @@ public class Main {
 
         udpClientServer.start();
 
-        if (myPort == ports[0]) {
-            Packet packet = new RequestFileListPacket(System.currentTimeMillis());
+        udpClientServer.addClient(new IpPort(InetAddress.getByName("localhost"), hisPort));
 
-            try {
-                Thread.sleep(6000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            udpClientServer.addPacketToQueue(ipPorts[0], packet);
-        } else {
-            udpClientServer.getFileManager().add(new TorroFile("dupa", 1, "asdkljhui1j2"));
-        }
+        new ConsoleController(udpClientServer).start();
+
+        System.exit(0);
     }
 
     private static boolean available(int port) {

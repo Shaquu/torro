@@ -2,34 +2,36 @@ package com.github.shaquu.networking.udp;
 
 import com.github.shaquu.networking.NetworkNode;
 import com.github.shaquu.networking.listener.FileListPacketListener;
+import com.github.shaquu.networking.listener.PushFilePacketListener;
 import com.github.shaquu.networking.listener.RequestFileListPacketListener;
 import com.github.shaquu.networking.packets.FileListPacket;
 import com.github.shaquu.networking.packets.Packet;
+import com.github.shaquu.networking.packets.PushFilePacket;
 import com.github.shaquu.networking.packets.RequestFileListPacket;
 import com.github.shaquu.utils.ArrayChunker;
 
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Objects;
+import java.util.*;
 
 public class UDPClientServer extends NetworkNode {
 
-    private final static int MESSAGE_SIZE = 2048;
+    private final static int MESSAGE_SIZE = 9192;
     private final static int WAIT_TIME = 1000;
 
     private final DatagramSocket serverSocket;
 
     private final HashMap<IpPort, Packet> packetQueue = new HashMap<>();
+    private List<IpPort> ipPortList = new ArrayList<>();
 
-    public UDPClientServer(int port) throws SocketException {
-        serverSocket = new DatagramSocket(port);
+    public UDPClientServer(int port, String folderPath) throws SocketException {
+        super(port, folderPath);
+        serverSocket = new DatagramSocket(this.port);
 
         registerListener(new RequestFileListPacketListener());
         registerListener(new FileListPacketListener());
+        registerListener(new PushFilePacketListener());
     }
 
     @Override
@@ -42,7 +44,7 @@ public class UDPClientServer extends NetworkNode {
 
         byte[] bytes = receivePacket.getData();
         IpPort ipPort = new IpPort(receivePacket.getAddress(), receivePacket.getPort());
-        logger.log("Received packet");
+        logger.debug("Received packet");
 
         super.notifyListeners(this, ipPort, bytes);
     }
@@ -64,7 +66,7 @@ public class UDPClientServer extends NetworkNode {
 
                 serverSocket.send(sendPacket);
 
-                logger.log(new Date() + "|Send bytes length: " + sendData.length);
+                logger.debug(new Date() + "|Send bytes length: " + sendData.length);
             }
         }
         Thread.sleep(WAIT_TIME);
@@ -75,6 +77,7 @@ public class UDPClientServer extends NetworkNode {
         int packetSize = packet.getPacketSize();
 
         if (packetSize > UDPClientServer.MESSAGE_SIZE) {
+            //TODO chunker not working. Sending big files dont chunk :(
             Byte[][] chunked = ArrayChunker.forBytes(packet.getData(), UDPClientServer.MESSAGE_SIZE - Packet.BASE_SIZE);
             int part = 1;
 
@@ -83,11 +86,11 @@ public class UDPClientServer extends NetworkNode {
             for (Byte[] data : chunked) {
                 chunkPacket = createPacketChunk(packet, part++, data);
                 packetQueue.put(ipPort, chunkPacket);
-                logger.log("Added packet to queue " + Objects.requireNonNull(chunkPacket).getClass().getTypeName() + " " + chunkPacket.toString() + " " + chunkPacket.getPacketSize());
+                logger.debug("Added packet to queue " + Objects.requireNonNull(chunkPacket).getClass().getTypeName() + " " + chunkPacket.toString() + " " + chunkPacket.getPacketSize());
             }
         } else {
             packetQueue.put(ipPort, packet);
-            logger.log("Added packet to queue " + packet.getClass().getTypeName() + " " + packet.toString() + " " + packetSize);
+            logger.debug("Added packet to queue " + packet.getClass().getTypeName() + " " + packet.toString() + " " + packetSize);
         }
     }
 
@@ -96,11 +99,24 @@ public class UDPClientServer extends NetworkNode {
             return new RequestFileListPacket(packet.getId());
         } else if (packet instanceof FileListPacket) {
             return new FileListPacket(packet.getId(), part, packet.getMaxPart(), data);
+        } else if (packet instanceof PushFilePacket) {
+            return new PushFilePacket(packet.getId(), part, packet.getMaxPart(), data);
         }
         return null;
     }
 
+    public void addClient(IpPort ipPort) {
+        ipPortList.add(ipPort);
+    }
+
     @Override
-    public void addPacketToQueue(Packet packet) {
+    public void addPacketToQueue(Packet packet) throws Exception {
+        for (IpPort ipPort : ipPortList) {
+            addPacketToQueue(ipPort, packet);
+        }
+    }
+
+    public List<IpPort> getIpPortList() {
+        return ipPortList;
     }
 }

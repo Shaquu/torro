@@ -37,7 +37,7 @@ public class RequestFileListPacketListener implements Listener {
     private Packet handler(NetworkNode networkNode) throws IOException {
         List<TorroFile> fileList = networkNode.getFileManager().getFileList();
 
-        networkNode.getLogger().log("Sending file list: " + Arrays.toString(fileList.toArray()));
+        networkNode.getLogger().debug("Sending file list: " + Arrays.toString(fileList.toArray()));
 
         byte[] bytesToSend = Packet.toBytes(fileList);
         return new FileListPacket(System.currentTimeMillis(), 1, 1, PrimitiveObject.toByteArrObject(bytesToSend));
