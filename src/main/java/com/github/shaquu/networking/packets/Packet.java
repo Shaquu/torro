@@ -20,6 +20,27 @@ public class Packet implements Serializable {
         this.data = data;
     }
 
+    public static byte[] toBytes(Object object) throws IOException {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        ObjectOutput out;
+        out = new ObjectOutputStream(bos);
+        out.writeObject(object);
+        out.flush();
+
+        out.close();
+
+        return bos.toByteArray();
+    }
+
+    public static Object fromBytes(byte[] bytes) throws IOException, ClassNotFoundException {
+        try (
+                ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
+                ObjectInput in = new ObjectInputStream(bis)
+        ) {
+            return in.readObject();
+        }
+    }
+
     public long getId() {
         return id;
     }
@@ -40,27 +61,6 @@ public class Packet implements Serializable {
                 ", maxPart=" + maxPart +
                 ", data=" + Arrays.toString(data) +
                 '}';
-    }
-
-    public static byte[] toBytes(Object object) throws IOException {
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        ObjectOutput out;
-        out = new ObjectOutputStream(bos);
-        out.writeObject(object);
-        out.flush();
-
-        out.close();
-
-        return bos.toByteArray();
-    }
-
-    public static Object fromBytes(byte[] bytes) throws IOException, ClassNotFoundException {
-        try (
-                ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
-                ObjectInput in = new ObjectInputStream(bis);
-        ) {
-            return in.readObject();
-        }
     }
 
     public Byte[] getData() {

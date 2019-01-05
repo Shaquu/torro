@@ -6,8 +6,9 @@ import com.github.shaquu.networking.packets.RequestFileListPacket;
 import com.github.shaquu.networking.udp.IpPort;
 import com.github.shaquu.networking.udp.UDPClientServer;
 
-import java.io.IOException;
-import java.net.*;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.SocketException;
 
 public class Main {
 

@@ -1,19 +1,20 @@
 package com.github.shaquu.networking.udp;
 
-import com.github.shaquu.logger.Logger;
 import com.github.shaquu.networking.NetworkNode;
-import com.github.shaquu.networking.listener.*;
+import com.github.shaquu.networking.listener.FileListPacketListener;
+import com.github.shaquu.networking.listener.RequestFileListPacketListener;
 import com.github.shaquu.networking.packets.FileListPacket;
 import com.github.shaquu.networking.packets.Packet;
 import com.github.shaquu.networking.packets.RequestFileListPacket;
 import com.github.shaquu.utils.ArrayChunker;
 
-import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.net.InetAddress;
 import java.net.SocketException;
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Objects;
 
 public class UDPClientServer extends NetworkNode {
 
@@ -82,7 +83,7 @@ public class UDPClientServer extends NetworkNode {
             for (Byte[] data : chunked) {
                 chunkPacket = createPacketChunk(packet, part++, data);
                 packetQueue.put(ipPort, chunkPacket);
-                logger.log("Added packet to queue " + chunkPacket.getClass().getTypeName() + " " + chunkPacket.toString() + " " + chunkPacket.getPacketSize());
+                logger.log("Added packet to queue " + Objects.requireNonNull(chunkPacket).getClass().getTypeName() + " " + chunkPacket.toString() + " " + chunkPacket.getPacketSize());
             }
         } else {
             packetQueue.put(ipPort, packet);
@@ -100,5 +101,6 @@ public class UDPClientServer extends NetworkNode {
     }
 
     @Override
-    public void addPacketToQueue(Packet packet) {}
+    public void addPacketToQueue(Packet packet) {
+    }
 }

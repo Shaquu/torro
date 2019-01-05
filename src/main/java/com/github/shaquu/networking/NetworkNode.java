@@ -16,12 +16,12 @@ public abstract class NetworkNode extends ListenerManager {
     private PacketManager packetManager;
     private FileManager fileManager;
 
-    public NetworkNode() {
+    protected NetworkNode() {
         fileManager = new FileManager();
         packetManager = new PacketManager();
 
         receiverThread = new Thread(() -> {
-            while(true) {
+            while (true) {
                 try {
                     receiver();
                 } catch (Exception e) {
@@ -49,15 +49,18 @@ public abstract class NetworkNode extends ListenerManager {
     }
 
     protected abstract void receiver() throws Exception;
+
     protected abstract void sender() throws Exception;
 
     public abstract void addPacketToQueue(IpPort ipPort, Packet packet) throws Exception;
+
     public abstract void addPacketToQueue(Packet packet);
 
     public FileManager getFileManager() {
         return fileManager;
     }
-    public PacketManager getPacketManager(){
+
+    public PacketManager getPacketManager() {
         return packetManager;
     }
 
