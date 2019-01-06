@@ -1,10 +1,7 @@
 package com.github.shaquu.networking.listener;
 
 import com.github.shaquu.networking.NetworkNode;
-import com.github.shaquu.networking.packets.FileListPacket;
-import com.github.shaquu.networking.packets.Packet;
-import com.github.shaquu.networking.packets.PushFilePacket;
-import com.github.shaquu.networking.packets.RequestFileListPacket;
+import com.github.shaquu.networking.packets.*;
 import com.github.shaquu.networking.udp.IpPort;
 import com.github.shaquu.networking.udp.UDPClientServer;
 
@@ -39,6 +36,12 @@ public class ListenerManager {
                 if (packet instanceof PushFilePacket) {
                     listener.call(networkNode, packet);
                 }
+            } else if (listener instanceof PullFilePacketListener) {
+                if (packet instanceof PullFilePacket) {
+                    listener.call(networkNode, packet);
+                }
+            } else {
+                networkNode.getLogger().debug("Listener type not supported in notifyListeners");
             }
         }
     }
@@ -60,6 +63,12 @@ public class ListenerManager {
                 if (packet instanceof PushFilePacket) {
                     listener.call(udpClientServer, ipPort, packet);
                 }
+            } else if (listener instanceof PullFilePacketListener) {
+                if (packet instanceof PullFilePacket) {
+                    listener.call(udpClientServer, ipPort, packet);
+                }
+            } else {
+                udpClientServer.getLogger().debug("Listener type not supported in notifyListeners");
             }
         }
     }

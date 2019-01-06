@@ -4,6 +4,7 @@ import com.github.shaquu.file.TorroFile;
 import com.github.shaquu.file.TorroFileWithContent;
 import com.github.shaquu.networking.NetworkNode;
 import com.github.shaquu.networking.packets.Packet;
+import com.github.shaquu.networking.packets.PullFilePacket;
 import com.github.shaquu.networking.packets.PushFilePacket;
 import com.github.shaquu.networking.packets.RequestFileListPacket;
 import com.github.shaquu.networking.udp.IpPort;
@@ -14,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-public class ConsoleController {
+public abstract class ConsoleController {
 
     private final NetworkNode networkNode;
     private final Scanner scanner = new Scanner(System.in);
@@ -23,7 +24,7 @@ public class ConsoleController {
 
     private int commandNumber = 0;
 
-    public ConsoleController(NetworkNode networkNode) {
+    protected ConsoleController(NetworkNode networkNode) {
         this.networkNode = networkNode;
 
         commandList.add(new Command() {
@@ -92,6 +93,22 @@ public class ConsoleController {
                 }
             }
         });
+
+        commandList.add(new Command() {
+            @Override
+            public String description() {
+                return "Pull file [" + (commandNumber++) + "]";
+            }
+
+            @Override
+            public void execute() {
+                try {
+                    pullFile();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
     public void start() {
@@ -132,6 +149,25 @@ public class ConsoleController {
         networkNode.getLogger().log("My file list:" + stringBuilder.toString());
     }
 
+    private void printClientFileList(int clientNumber) {
+        StringBuilder stringBuilder = new StringBuilder();
+
+        int i = 0;
+
+        if (networkNode instanceof UDPClientServer) {
+            UDPClientServer udpClientServer = (UDPClientServer) networkNode;
+
+            IpPort ipPort = udpClientServer.getIpPortList().get(clientNumber);
+
+            if (udpClientServer.getClientFileMap().containsKey(ipPort))
+                for (TorroFile torroFile : udpClientServer.getClientFileMap().get(ipPort)) {
+                    stringBuilder.append("\n[").append(i++).append("] ").append(torroFile.toString());
+                }
+        }
+
+        networkNode.getLogger().log("Client file list:" + stringBuilder.toString());
+    }
+
     private void printMyClients() {
         StringBuilder stringBuilder = new StringBuilder();
 
@@ -158,7 +194,7 @@ public class ConsoleController {
         int fileNumber = scanner.nextInt();
 
         if (fileNumber < 0 || fileNumber >= fileList.size()) {
-            networkNode.getLogger().log("Wrong file number;");
+            networkNode.getLogger().log("Wrong file number.");
             return;
         }
 
@@ -180,7 +216,7 @@ public class ConsoleController {
             UDPClientServer udpClientServer = (UDPClientServer) networkNode;
 
             if (clientNumber < 0 || clientNumber >= udpClientServer.getIpPortList().size()) {
-                networkNode.getLogger().log("Wrong client number;");
+                networkNode.getLogger().log("Wrong client number.");
                 return;
             }
 
@@ -189,6 +225,50 @@ public class ConsoleController {
             Byte[] data = PrimitiveObject.toByteArrObject(Packet.toBytes(torroFileWithContent));
 
             Packet packet = new PushFilePacket(System.currentTimeMillis(), 1, 1, data);
+            networkNode.addPacketToQueue(udpClientServer.getIpPortList().get(clientNumber), packet);
+        }
+    }
+
+    private void pullFile() throws Exception {
+        printMyClients();
+        networkNode.getLogger().log("Select client number from who file will be pulled:");
+
+        int clientNumber = scanner.nextInt();
+
+        if (networkNode instanceof UDPClientServer) {
+            UDPClientServer udpClientServer = (UDPClientServer) networkNode;
+
+            if (clientNumber < 0 || clientNumber >= udpClientServer.getIpPortList().size()) {
+                networkNode.getLogger().log("Wrong client number.");
+                return;
+            }
+
+            printClientFileList(clientNumber);
+            networkNode.getLogger().log("Select file number to pull:");
+
+            IpPort ipPort = udpClientServer.getIpPortList().get(clientNumber);
+
+            List<TorroFile> fileList = udpClientServer.getClientFileMap().get(ipPort);
+
+            if (fileList == null) {
+                networkNode.getLogger().log("Request file list from client first or client has no files.");
+                return;
+            }
+
+            int fileNumber = scanner.nextInt();
+
+            if (fileNumber < 0 || fileNumber >= fileList.size()) {
+                networkNode.getLogger().log("Wrong file number.");
+                return;
+            }
+
+            TorroFile torroFile = fileList.get(fileNumber);
+
+            networkNode.getLogger().log("Pulling file from client");
+
+            Byte[] data = PrimitiveObject.toByteArrObject(Packet.toBytes(torroFile));
+
+            Packet packet = new PullFilePacket(System.currentTimeMillis(), 1, 1, data);
             networkNode.addPacketToQueue(udpClientServer.getIpPortList().get(clientNumber), packet);
         }
     }

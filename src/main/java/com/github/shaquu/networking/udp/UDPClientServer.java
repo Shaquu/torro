@@ -1,13 +1,12 @@
 package com.github.shaquu.networking.udp;
 
+import com.github.shaquu.file.TorroFile;
 import com.github.shaquu.networking.NetworkNode;
 import com.github.shaquu.networking.listener.FileListPacketListener;
+import com.github.shaquu.networking.listener.PullFilePacketListener;
 import com.github.shaquu.networking.listener.PushFilePacketListener;
 import com.github.shaquu.networking.listener.RequestFileListPacketListener;
-import com.github.shaquu.networking.packets.FileListPacket;
-import com.github.shaquu.networking.packets.Packet;
-import com.github.shaquu.networking.packets.PushFilePacket;
-import com.github.shaquu.networking.packets.RequestFileListPacket;
+import com.github.shaquu.networking.packets.*;
 import com.github.shaquu.utils.ArrayChunker;
 
 import java.net.DatagramPacket;
@@ -26,6 +25,8 @@ public class UDPClientServer extends NetworkNode {
     private final ConcurrentLinkedQueue<IpPortPacket> packetQueue = new ConcurrentLinkedQueue<>();
     private List<IpPort> ipPortList = new ArrayList<>();
 
+    private HashMap<IpPort, List<TorroFile>> clientFileMap = new HashMap<>();
+
     public UDPClientServer(int port, String folderPath) throws SocketException {
         super(port, folderPath);
         serverSocket = new DatagramSocket(this.port);
@@ -33,6 +34,7 @@ public class UDPClientServer extends NetworkNode {
         registerListener(new RequestFileListPacketListener());
         registerListener(new FileListPacketListener());
         registerListener(new PushFilePacketListener());
+        registerListener(new PullFilePacketListener());
     }
 
     @Override
@@ -102,7 +104,10 @@ public class UDPClientServer extends NetworkNode {
             return new FileListPacket(packet.getId(), part, maxPart, data);
         } else if (packet instanceof PushFilePacket) {
             return new PushFilePacket(packet.getId(), part, maxPart, data);
+        } else if (packet instanceof PullFilePacket) {
+            return new PullFilePacket(packet.getId(), part, maxPart, data);
         }
+        logger.debug("Packet type not supported in createPacketChunk.");
         return null;
     }
 
@@ -119,5 +124,13 @@ public class UDPClientServer extends NetworkNode {
 
     public List<IpPort> getIpPortList() {
         return ipPortList;
+    }
+
+    public void addClienFileList(IpPort ipPort, List<TorroFile> fileList) {
+        clientFileMap.put(ipPort, fileList);
+    }
+
+    public HashMap<IpPort, List<TorroFile>> getClientFileMap() {
+        return clientFileMap;
     }
 }

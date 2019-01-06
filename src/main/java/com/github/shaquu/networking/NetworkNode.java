@@ -1,5 +1,6 @@
 package com.github.shaquu.networking;
 
+import com.github.shaquu.controller.ConsoleController;
 import com.github.shaquu.file.FileManager;
 import com.github.shaquu.logger.Logger;
 import com.github.shaquu.networking.listener.ListenerManager;
@@ -18,6 +19,8 @@ public abstract class NetworkNode extends ListenerManager {
     private FileManager fileManager;
 
     private String folderPath;
+
+    private ConsoleController consoleController;
 
     protected NetworkNode(int port, String folderPath) {
         this.port = port;
@@ -45,6 +48,13 @@ public abstract class NetworkNode extends ListenerManager {
                 }
             }
         });
+
+        consoleController = new ConsoleController(this) {
+            @Override
+            public void start() {
+                super.start();
+            }
+        };
     }
 
     public void start() {
@@ -52,6 +62,8 @@ public abstract class NetworkNode extends ListenerManager {
 
         receiverThread.start();
         senderThread.start();
+
+        consoleController.start();
     }
 
     protected abstract void receiver() throws Exception;

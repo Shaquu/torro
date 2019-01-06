@@ -17,7 +17,11 @@ public class FileListPacketListener implements Listener {
 
     @Override
     public void call(UDPClientServer udpClientServer, IpPort ipPort, Packet packet) throws Exception {
-        handler(udpClientServer, packet);
+        List<TorroFile> fileList = (List<TorroFile>) handler(udpClientServer, packet);
+
+        if (fileList != null) {
+            udpClientServer.addClienFileList(ipPort, fileList);
+        }
     }
 
     @Override
@@ -25,7 +29,7 @@ public class FileListPacketListener implements Listener {
         handler(networkNode, packet);
     }
 
-    private void handler(NetworkNode networkNode, Packet packet) throws IOException, ClassNotFoundException {
+    private Object handler(NetworkNode networkNode, Packet packet) throws IOException, ClassNotFoundException {
         boolean received = networkNode.getPacketManager().add(packet);
 
         if (received) {
@@ -37,6 +41,10 @@ public class FileListPacketListener implements Listener {
             List<TorroFile> fileList = (ArrayList<TorroFile>) Packet.fromBytes(allBytes);
 
             networkNode.getLogger().debug(Arrays.toString(fileList.toArray()));
+
+            return fileList;
         }
+
+        return null;
     }
 }

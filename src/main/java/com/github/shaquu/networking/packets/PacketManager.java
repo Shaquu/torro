@@ -48,6 +48,10 @@ public class PacketManager {
                 return new RequestFileListPacket(id);
             } else if (clazz == FileListPacket.class) {
                 return new FileListPacket(id, 1, 1, data);
+            } else if (clazz == PullFilePacket.class) {
+                return new PullFilePacket(id, 1, 1, data);
+            } else if (clazz == PushFilePacket.class) {
+                return new PushFilePacket(id, 1, 1, data);
             } else {
                 return new Packet(id, -1, -1, data);
             }

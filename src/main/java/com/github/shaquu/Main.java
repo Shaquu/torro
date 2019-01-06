@@ -1,6 +1,5 @@
 package com.github.shaquu;
 
-import com.github.shaquu.controller.ConsoleController;
 import com.github.shaquu.logger.Logger;
 import com.github.shaquu.networking.udp.IpPort;
 import com.github.shaquu.networking.udp.UDPClientServer;
@@ -37,11 +36,9 @@ public class Main {
             return;
         }
 
-        udpClientServer.start();
-
         udpClientServer.addClient(new IpPort(InetAddress.getByName("localhost"), hisPort));
 
-        new ConsoleController(udpClientServer).start();
+        udpClientServer.start();
 
         System.exit(0);
     }
