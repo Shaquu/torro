@@ -24,25 +24,18 @@ public class PacketManager {
 
         receivedParts.get(id)[packet.getPart() - 1] = packet;
 
-        return receivedParts.get(id).length == maxPart;
-    }
 
-    public Packet getPacket(long id) {
-        if (receivedParts.containsKey(id)) {
-            List<Byte> byteList = new ArrayList<>();
+        for (Packet p : receivedParts.get(id)) {
+            if (p == null)
+                return false;
+        }
 
-            for (Packet partPacket : receivedParts.get(id)) {
-                byteList.addAll(Arrays.asList(partPacket.getData()));
-            }
-
-            Byte[] data = byteList.toArray(new Byte[0]);
-
-            return new Packet(id, -1, -1, data);
-        } else return null;
+        return true;
     }
 
     public Packet getPacket(Class clazz, long id) {
         if (receivedParts.containsKey(id)) {
+
             List<Byte> byteList = new ArrayList<>();
 
             for (Packet partPacket : receivedParts.get(id)) {

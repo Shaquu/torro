@@ -14,15 +14,16 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
 import java.util.*;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class UDPClientServer extends NetworkNode {
 
-    private final static int MESSAGE_SIZE = 9192;
+    private final static int MESSAGE_SIZE = 1024;
     private final static int WAIT_TIME = 1000;
 
     private final DatagramSocket serverSocket;
 
-    private final HashMap<IpPort, Packet> packetQueue = new HashMap<>();
+    private final ConcurrentLinkedQueue<IpPortPacket> packetQueue = new ConcurrentLinkedQueue<>();
     private List<IpPort> ipPortList = new ArrayList<>();
 
     public UDPClientServer(int port, String folderPath) throws SocketException {
@@ -36,7 +37,7 @@ public class UDPClientServer extends NetworkNode {
 
     @Override
     protected void receiver() throws Exception {
-        byte[] receiveData = new byte[MESSAGE_SIZE];
+        byte[] receiveData = new byte[MESSAGE_SIZE * 10];
 
         DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
 
@@ -52,11 +53,12 @@ public class UDPClientServer extends NetworkNode {
     @Override
     protected void sender() throws Exception {
         if (packetQueue.size() > 0) {
-            Iterator<IpPort> iterator = packetQueue.keySet().iterator();
+            Iterator<IpPortPacket> iterator = packetQueue.iterator();
 
             while (iterator.hasNext()) {
-                IpPort ipPort = iterator.next();
-                Packet packet = packetQueue.get(ipPort);
+                IpPortPacket ipPortPacket = iterator.next();
+                IpPort ipPort = ipPortPacket.getIpPort();
+                Packet packet = ipPortPacket.getPacket();
 
                 iterator.remove();
 
@@ -77,30 +79,29 @@ public class UDPClientServer extends NetworkNode {
         int packetSize = packet.getPacketSize();
 
         if (packetSize > UDPClientServer.MESSAGE_SIZE) {
-            //TODO chunker not working. Sending big files dont chunk :(
             Byte[][] chunked = ArrayChunker.forBytes(packet.getData(), UDPClientServer.MESSAGE_SIZE - Packet.BASE_SIZE);
             int part = 1;
 
             Packet chunkPacket;
 
             for (Byte[] data : chunked) {
-                chunkPacket = createPacketChunk(packet, part++, data);
-                packetQueue.put(ipPort, chunkPacket);
+                chunkPacket = createPacketChunk(packet, part++, chunked.length, data);
+                packetQueue.add(new IpPortPacket(ipPort, chunkPacket));
                 logger.debug("Added packet to queue " + Objects.requireNonNull(chunkPacket).getClass().getTypeName() + " " + chunkPacket.toString() + " " + chunkPacket.getPacketSize());
             }
         } else {
-            packetQueue.put(ipPort, packet);
+            packetQueue.add(new IpPortPacket(ipPort, packet));
             logger.debug("Added packet to queue " + packet.getClass().getTypeName() + " " + packet.toString() + " " + packetSize);
         }
     }
 
-    private Packet createPacketChunk(Packet packet, int part, Byte[] data) {
+    private Packet createPacketChunk(Packet packet, int part, int maxPart, Byte[] data) {
         if (packet instanceof RequestFileListPacket) {
             return new RequestFileListPacket(packet.getId());
         } else if (packet instanceof FileListPacket) {
-            return new FileListPacket(packet.getId(), part, packet.getMaxPart(), data);
+            return new FileListPacket(packet.getId(), part, maxPart, data);
         } else if (packet instanceof PushFilePacket) {
-            return new PushFilePacket(packet.getId(), part, packet.getMaxPart(), data);
+            return new PushFilePacket(packet.getId(), part, maxPart, data);
         }
         return null;
     }
