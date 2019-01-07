@@ -1,10 +1,12 @@
 package com.github.shaquu.networking.listener;
 
 import com.github.shaquu.file.TorroFile;
+import com.github.shaquu.networking.IpPort;
 import com.github.shaquu.networking.NetworkNode;
 import com.github.shaquu.networking.packets.FileListPacket;
 import com.github.shaquu.networking.packets.Packet;
-import com.github.shaquu.networking.udp.IpPort;
+import com.github.shaquu.networking.tcp.TCPCLient;
+import com.github.shaquu.networking.tcp.TCPServer;
 import com.github.shaquu.networking.udp.UDPClientServer;
 import com.github.shaquu.utils.PrimitiveObject;
 
@@ -25,8 +27,12 @@ public class FileListPacketListener implements Listener {
     }
 
     @Override
-    public void call(NetworkNode networkNode, Packet packet) throws Exception {
-        handler(networkNode, packet);
+    public void call(TCPServer tcpServer, TCPCLient tcpcLient, Packet packet) throws Exception {
+        List<TorroFile> fileList = (List<TorroFile>) handler(tcpServer, packet);
+
+        if (fileList != null) {
+            tcpServer.addClienFileList(tcpcLient.getId(), fileList);
+        }
     }
 
     private Object handler(NetworkNode networkNode, Packet packet) throws IOException, ClassNotFoundException {

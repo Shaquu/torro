@@ -1,19 +1,16 @@
 package com.github.shaquu.networking.udp;
 
 import com.github.shaquu.file.TorroFile;
+import com.github.shaquu.networking.IpPort;
+import com.github.shaquu.networking.IpPortPacket;
 import com.github.shaquu.networking.NetworkNode;
-import com.github.shaquu.networking.listener.FileListPacketListener;
-import com.github.shaquu.networking.listener.PullFilePacketListener;
-import com.github.shaquu.networking.listener.PushFilePacketListener;
-import com.github.shaquu.networking.listener.RequestFileListPacketListener;
-import com.github.shaquu.networking.packets.*;
+import com.github.shaquu.networking.packets.Packet;
 import com.github.shaquu.utils.ArrayChunker;
 
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
 import java.util.*;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class UDPClientServer extends NetworkNode {
 
@@ -22,19 +19,11 @@ public class UDPClientServer extends NetworkNode {
 
     private final DatagramSocket serverSocket;
 
-    private final ConcurrentLinkedQueue<IpPortPacket> packetQueue = new ConcurrentLinkedQueue<>();
-    private List<IpPort> ipPortList = new ArrayList<>();
-
     private HashMap<IpPort, List<TorroFile>> clientFileMap = new HashMap<>();
 
     public UDPClientServer(int port, String folderPath) throws SocketException {
         super(port, folderPath);
         serverSocket = new DatagramSocket(this.port);
-
-        registerListener(new RequestFileListPacketListener());
-        registerListener(new FileListPacketListener());
-        registerListener(new PushFilePacketListener());
-        registerListener(new PullFilePacketListener());
     }
 
     @Override
@@ -95,24 +84,6 @@ public class UDPClientServer extends NetworkNode {
             packetQueue.add(new IpPortPacket(ipPort, packet));
             logger.debug("Added packet to queue " + packet.getClass().getTypeName() + " " + packet.toString() + " " + packetSize);
         }
-    }
-
-    private Packet createPacketChunk(Packet packet, int part, int maxPart, Byte[] data) {
-        if (packet instanceof RequestFileListPacket) {
-            return new RequestFileListPacket(packet.getId());
-        } else if (packet instanceof FileListPacket) {
-            return new FileListPacket(packet.getId(), part, maxPart, data);
-        } else if (packet instanceof PushFilePacket) {
-            return new PushFilePacket(packet.getId(), part, maxPart, data);
-        } else if (packet instanceof PullFilePacket) {
-            return new PullFilePacket(packet.getId(), part, maxPart, data);
-        }
-        logger.debug("Packet type not supported in createPacketChunk.");
-        return null;
-    }
-
-    public void addClient(IpPort ipPort) {
-        ipPortList.add(ipPort);
     }
 
     @Override

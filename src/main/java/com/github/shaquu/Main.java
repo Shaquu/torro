@@ -1,44 +1,102 @@
 package com.github.shaquu;
 
 import com.github.shaquu.logger.Logger;
-import com.github.shaquu.networking.udp.IpPort;
+import com.github.shaquu.networking.IpPort;
+import com.github.shaquu.networking.tcp.TCPServer;
 import com.github.shaquu.networking.udp.UDPClientServer;
 
+import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 public class Main {
 
     private static int[] ports = new int[]{10004, 10005};
 
+    //for udp with debug
+    //java -jar target/torro-1.0-SNAPSHOT.jar true true 10001 10001 10002 10003
+
     public static void main(String[] args) throws Exception {
 
-        Logger.DEBUG = true;
+        Logger.DEBUG = Boolean.parseBoolean(args[0]);
 
-        int myPort;
-        int hisPort;
+        boolean udp = Boolean.parseBoolean(args[1]);
 
-        if (available(ports[0])) {
-            myPort = ports[0];
-            hisPort = ports[1];
-        } else {
-            myPort = ports[1];
-            hisPort = ports[0];
+        int myPort = Integer.parseInt(args[2]);
+
+        if (!available(myPort)) {
+            System.out.println("Port not available");
+            System.exit(0);
         }
 
-        UDPClientServer udpClientServer;
+        String folder = args[3];
+        List<Integer> theirPorts = new ArrayList<>();
+
+        for (int i = 4; i < args.length; i++) {
+            theirPorts.add(Integer.parseInt(args[i]));
+        }
 
         try {
-            udpClientServer = new UDPClientServer(myPort, "" + myPort);
+            if (udp) {
+                UDPClientServer udpClientServer = new UDPClientServer(myPort, folder);
+
+                for (int port : theirPorts) {
+                    udpClientServer.addClient(new IpPort(InetAddress.getByName("localhost"), port));
+                }
+
+                udpClientServer.start();
+                udpClientServer.stop();
+            } else {
+                TCPServer tcpServer = new TCPServer(myPort, folder);
+
+                new Thread(() -> {
+                    List<Integer> toJoin = new ArrayList<>(theirPorts);
+
+                    Iterator<Integer> iterator = toJoin.iterator();
+
+                    while (iterator.hasNext()) {
+                        boolean connected = false;
+
+                        int port = iterator.next();
+
+                        try {
+                            connected = tcpServer.connect(port);
+                        } catch (IOException e) {
+                            //System.out.println("Cannot connect " + e.getLocalizedMessage());
+                        }
+
+                        if (connected) {
+                            System.out.println("Connected to " + port);
+                            iterator.remove();
+                        }
+
+                        try {
+                            Thread.sleep(TCPServer.WAIT_TIME);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+
+                        if (toJoin.size() == 0) {
+                            break;
+                        }
+
+                        if (!iterator.hasNext()) {
+                            iterator = toJoin.iterator();
+                        }
+                    }
+                }).start();
+
+                tcpServer.start();
+                tcpServer.stop();
+            }
         } catch (SocketException e) {
             e.printStackTrace();
             return;
         }
-
-        udpClientServer.addClient(new IpPort(InetAddress.getByName("localhost"), hisPort));
-
-        udpClientServer.start();
 
         System.exit(0);
     }

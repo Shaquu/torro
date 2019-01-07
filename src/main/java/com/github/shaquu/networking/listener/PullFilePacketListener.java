@@ -2,11 +2,13 @@ package com.github.shaquu.networking.listener;
 
 import com.github.shaquu.file.TorroFile;
 import com.github.shaquu.file.TorroFileWithContent;
+import com.github.shaquu.networking.IpPort;
 import com.github.shaquu.networking.NetworkNode;
 import com.github.shaquu.networking.packets.Packet;
 import com.github.shaquu.networking.packets.PullFilePacket;
 import com.github.shaquu.networking.packets.PushFilePacket;
-import com.github.shaquu.networking.udp.IpPort;
+import com.github.shaquu.networking.tcp.TCPCLient;
+import com.github.shaquu.networking.tcp.TCPServer;
 import com.github.shaquu.networking.udp.UDPClientServer;
 import com.github.shaquu.utils.PrimitiveObject;
 
@@ -39,8 +41,27 @@ public class PullFilePacketListener implements Listener {
     }
 
     @Override
-    public void call(NetworkNode networkNode, Packet packet) throws Exception {
-        handler(networkNode, packet);
+    public void call(TCPServer tcpServer, TCPCLient tcpcLient, Packet packet) throws Exception {
+        TorroFile file = handler(tcpServer, packet);
+
+        if (file == null) {
+            return;
+        }
+
+        TorroFileWithContent torroFileWithContent =
+                new TorroFileWithContent(
+                        file.getFileName(),
+                        file.getFileSize(),
+                        file.getMd5(),
+                        tcpServer.getFileManager().getFileContent(file.getMd5())
+                );
+
+        tcpServer.getLogger().log("Pushing file to client");
+
+        Byte[] data = PrimitiveObject.toByteArrObject(Packet.toBytes(torroFileWithContent));
+
+        Packet packetToSend = new PushFilePacket(System.currentTimeMillis(), 1, 1, data);
+        tcpcLient.addPacketToQueue(packetToSend);
     }
 
     private TorroFile handler(NetworkNode networkNode, Packet packet) throws IOException, ClassNotFoundException {

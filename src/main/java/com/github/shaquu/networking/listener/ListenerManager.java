@@ -1,8 +1,9 @@
 package com.github.shaquu.networking.listener;
 
-import com.github.shaquu.networking.NetworkNode;
+import com.github.shaquu.networking.IpPort;
 import com.github.shaquu.networking.packets.*;
-import com.github.shaquu.networking.udp.IpPort;
+import com.github.shaquu.networking.tcp.TCPCLient;
+import com.github.shaquu.networking.tcp.TCPServer;
 import com.github.shaquu.networking.udp.UDPClientServer;
 
 import java.util.ArrayList;
@@ -15,33 +16,37 @@ public class ListenerManager {
         listeners.add(listener);
     }
 
-    public void unregisterListener(Listener listener) {
+    protected void unregisterListener(Listener listener) {
         listeners.remove(listener);
     }
 
-    protected void notifyListeners(NetworkNode networkNode, byte[] bytes) throws Exception {
+    public void notifyListeners(TCPServer tcpServer, TCPCLient tcpcLient, byte[] bytes) throws Exception {
         Packet packet = (Packet) Packet.fromBytes(bytes);
-        networkNode.getLogger().debug("Received packet " + packet.getClass().getTypeName() + " " + packet.toString());
+        tcpServer.getLogger().debug("Received packet " + packet.getClass().getTypeName() + " " + packet.toString());
 
         for (Listener listener : listeners) {
             if (listener instanceof RequestFileListPacketListener) {
                 if (packet instanceof RequestFileListPacket) {
-                    listener.call(networkNode, packet);
+                    listener.call(tcpServer, tcpcLient, packet);
                 }
             } else if (listener instanceof FileListPacketListener) {
                 if (packet instanceof FileListPacket) {
-                    listener.call(networkNode, packet);
+                    listener.call(tcpServer, tcpcLient, packet);
                 }
             } else if (listener instanceof PushFilePacketListener) {
                 if (packet instanceof PushFilePacket) {
-                    listener.call(networkNode, packet);
+                    listener.call(tcpServer, tcpcLient, packet);
                 }
             } else if (listener instanceof PullFilePacketListener) {
                 if (packet instanceof PullFilePacket) {
-                    listener.call(networkNode, packet);
+                    listener.call(tcpServer, tcpcLient, packet);
+                }
+            } else if (listener instanceof LogOnPacketListener) {
+                if (packet instanceof LogOnPacket) {
+                    listener.call(tcpServer, tcpcLient, packet);
                 }
             } else {
-                networkNode.getLogger().debug("Listener type not supported in notifyListeners");
+                tcpServer.getLogger().debug("Listener type not supported in notifyListeners");
             }
         }
     }

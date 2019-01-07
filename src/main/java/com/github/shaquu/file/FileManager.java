@@ -27,15 +27,14 @@ public class FileManager {
         this.loadFiles(folderPath);
     }
 
-
-    public List<TorroFile> getFileList() {
-        return fileList;
-    }
-
     private static String calculateMd5(byte[] fileContent) throws NoSuchAlgorithmException {
         MessageDigest messageDigest = MessageDigest.getInstance("MD5");
         final byte[] resultByte = messageDigest.digest(fileContent);
         return String.format("%032x", new BigInteger(1, resultByte));
+    }
+
+    public List<TorroFile> getFileList() {
+        return fileList;
     }
 
     public Byte[] getFileContent(String md5) {

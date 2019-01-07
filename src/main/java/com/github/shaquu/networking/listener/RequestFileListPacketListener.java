@@ -1,10 +1,12 @@
 package com.github.shaquu.networking.listener;
 
 import com.github.shaquu.file.TorroFile;
+import com.github.shaquu.networking.IpPort;
 import com.github.shaquu.networking.NetworkNode;
 import com.github.shaquu.networking.packets.FileListPacket;
 import com.github.shaquu.networking.packets.Packet;
-import com.github.shaquu.networking.udp.IpPort;
+import com.github.shaquu.networking.tcp.TCPCLient;
+import com.github.shaquu.networking.tcp.TCPServer;
 import com.github.shaquu.networking.udp.UDPClientServer;
 import com.github.shaquu.utils.PrimitiveObject;
 
@@ -25,12 +27,12 @@ public class RequestFileListPacketListener implements Listener {
     }
 
     @Override
-    public void call(NetworkNode networkNode, Packet packet) throws Exception {
-        boolean received = networkNode.getPacketManager().add(packet);
+    public void call(TCPServer tcpServer, TCPCLient tcpcLient, Packet packet) throws Exception {
+        boolean received = tcpServer.getPacketManager().add(packet);
 
         if (received) {
-            Packet packetToSend = handler(networkNode);
-            networkNode.addPacketToQueue(packetToSend);
+            Packet packetToSend = handler(tcpServer);
+            tcpServer.addPacketToQueue(packetToSend);
         }
     }
 

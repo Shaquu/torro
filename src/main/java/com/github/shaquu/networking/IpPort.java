@@ -1,4 +1,4 @@
-package com.github.shaquu.networking.udp;
+package com.github.shaquu.networking;
 
 import java.net.InetAddress;
 import java.util.Objects;
@@ -12,11 +12,11 @@ public class IpPort {
         this.port = port;
     }
 
-    InetAddress getIp() {
+    public InetAddress getIp() {
         return ip;
     }
 
-    int getPort() {
+    public int getPort() {
         return port;
     }
 

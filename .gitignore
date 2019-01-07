@@ -79,7 +79,6 @@ buildNumber.properties
 .mtj.tmp/
 
 # Package Files #
-*.jar
 *.war
 *.nar
 *.ear
@@ -216,5 +215,8 @@ Temporary Items
 
 .idea/
 *.iml
-10004
-10005
+/10001
+/10002
+/10003
+/10004
+/10005

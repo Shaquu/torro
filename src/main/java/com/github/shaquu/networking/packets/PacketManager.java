@@ -1,9 +1,6 @@
 package com.github.shaquu.networking.packets;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 public class PacketManager {
 
@@ -38,9 +35,7 @@ public class PacketManager {
 
             List<Byte> byteList = new ArrayList<>();
 
-            for (Packet partPacket : receivedParts.get(id)) {
-                byteList.addAll(Arrays.asList(partPacket.getData()));
-            }
+            Arrays.stream(receivedParts.get(id)).forEach(e -> Collections.addAll(byteList, e.getData()));
 
             Byte[] data = byteList.toArray(new Byte[0]);
 
@@ -52,6 +47,8 @@ public class PacketManager {
                 return new PullFilePacket(id, 1, 1, data);
             } else if (clazz == PushFilePacket.class) {
                 return new PushFilePacket(id, 1, 1, data);
+            } else if (clazz == LogOnPacket.class) {
+                return new LogOnPacket(id);
             } else {
                 return new Packet(id, -1, -1, data);
             }

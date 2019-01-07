@@ -1,7 +1,6 @@
 package com.github.shaquu.networking.packets;
 
 import java.io.*;
-import java.util.Arrays;
 
 public class Packet implements Serializable {
 
@@ -22,11 +21,9 @@ public class Packet implements Serializable {
 
     public static byte[] toBytes(Object object) throws IOException {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        ObjectOutput out;
-        out = new ObjectOutputStream(bos);
-        out.writeObject(object);
-        out.flush();
+        ObjectOutput out = new ObjectOutputStream(bos);
 
+        out.writeObject(object);
         out.close();
 
         return bos.toByteArray();
@@ -45,11 +42,11 @@ public class Packet implements Serializable {
         return id;
     }
 
-    public int getPart() {
+    int getPart() {
         return part;
     }
 
-    public int getMaxPart() {
+    int getMaxPart() {
         return maxPart;
     }
 
@@ -59,7 +56,7 @@ public class Packet implements Serializable {
                 "id=" + id +
                 ", part=" + part +
                 ", maxPart=" + maxPart +
-                ", data=" + Arrays.toString(data) +
+                ", data=" + data.length +
                 '}';
     }
 
