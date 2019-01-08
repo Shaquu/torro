@@ -2,6 +2,7 @@
 [![Build Status](https://travis-ci.com/Shaquu/torro.svg?token=7sUv3fGQGS9ZRFDNSCi8&branch=master)](https://travis-ci.com/Shaquu/torro)
 
 Torro is a clean java UDP/TCP app to share files between hosts.
+Requirements for project [here](https://sites.google.com/site/skjzaocznelato/projekt);
 
 # Featuring
 
