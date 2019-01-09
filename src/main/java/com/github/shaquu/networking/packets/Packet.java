@@ -29,12 +29,14 @@ public class Packet implements Serializable {
         return bos.toByteArray();
     }
 
-    public static Object fromBytes(byte[] bytes) throws IOException, ClassNotFoundException {
+    public static Object fromBytes(byte[] bytes) throws ClassNotFoundException {
         try (
                 ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
                 ObjectInput in = new ObjectInputStream(bis)
         ) {
             return in.readObject();
+        } catch (IOException e) {
+            return null;
         }
     }
 
@@ -42,7 +44,7 @@ public class Packet implements Serializable {
         return id;
     }
 
-    int getPart() {
+    public int getPart() {
         return part;
     }
 

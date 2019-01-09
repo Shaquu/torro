@@ -16,7 +16,7 @@ import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Objects;
 
-public class PushFilePacketListener implements Listener {
+public class PushFilePartsPacketListener implements Listener {
 
     @Override
     public void call(UDPClientServer udpClientServer, IpPort ipPort, Packet packet) throws Exception {

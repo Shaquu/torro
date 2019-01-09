@@ -5,8 +5,11 @@ import com.github.shaquu.networking.IpPort;
 import com.github.shaquu.networking.IpPortPacket;
 import com.github.shaquu.networking.NetworkNode;
 import com.github.shaquu.networking.packets.Packet;
+import com.github.shaquu.networking.packets.PushFilePartsPacket;
 import com.github.shaquu.utils.ArrayChunker;
+import com.github.shaquu.utils.Utils;
 
+import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
@@ -60,6 +63,7 @@ public class UDPClientServer extends NetworkNode {
                 serverSocket.send(sendPacket);
 
                 logger.debug(new Date() + "|Send bytes length: " + sendData.length);
+                Thread.sleep(WAIT_TIME);
             }
         }
         Thread.sleep(WAIT_TIME);
@@ -71,19 +75,38 @@ public class UDPClientServer extends NetworkNode {
 
         if (packetSize > UDPClientServer.MESSAGE_SIZE) {
             Byte[][] chunked = ArrayChunker.forBytes(packet.getData(), UDPClientServer.MESSAGE_SIZE - Packet.BASE_SIZE);
-            int part = 1;
 
-            Packet chunkPacket;
+            boolean random = Utils.getRandomBoolean();
 
-            for (Byte[] data : chunked) {
-                chunkPacket = createPacketChunk(packet, part++, chunked.length, data);
-                packetQueue.add(new IpPortPacket(ipPort, chunkPacket));
-                logger.debug("Added packet to queue " + Objects.requireNonNull(chunkPacket).getClass().getTypeName() + " " + chunkPacket.toString() + " " + chunkPacket.getPacketSize());
+            if (random) {
+                for (int part = 1; part - 1 < chunked.length; part++) {
+                    directionHandler(ipPort, packet, chunked, part);
+
+                }
+            } else {
+                for (int part = chunked.length; part + 1 > chunked.length; part--) {
+                    directionHandler(ipPort, packet, chunked, part);
+
+                }
             }
         } else {
             packetQueue.add(new IpPortPacket(ipPort, packet));
             logger.debug("Added packet to queue " + packet.getClass().getTypeName() + " " + packet.toString() + " " + packetSize);
         }
+    }
+
+    private void directionHandler(IpPort ipPort, Packet packet, Byte[][] chunked, int part) throws IOException {
+        Packet chunkPacket;
+        if (packet instanceof PushFilePartsPacket) {
+            if (!((PushFilePartsPacket) packet).getParts().contains(part)) {
+                return;
+            }
+        }
+
+        chunkPacket = createPacketChunk(packet, part, chunked.length, chunked[part - 1]);
+
+        packetQueue.add(new IpPortPacket(ipPort, chunkPacket));
+        logger.debug("Added packet to queue " + Objects.requireNonNull(chunkPacket).getClass().getTypeName() + " " + chunkPacket.toString() + " " + chunkPacket.getPacketSize());
     }
 
     @Override

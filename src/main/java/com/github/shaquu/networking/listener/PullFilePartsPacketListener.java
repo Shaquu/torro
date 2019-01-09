@@ -5,8 +5,8 @@ import com.github.shaquu.file.TorroFileWithContent;
 import com.github.shaquu.networking.IpPort;
 import com.github.shaquu.networking.NetworkNode;
 import com.github.shaquu.networking.packets.Packet;
-import com.github.shaquu.networking.packets.PullFilePacket;
-import com.github.shaquu.networking.packets.PushFilePacket;
+import com.github.shaquu.networking.packets.PullFilePartsPacket;
+import com.github.shaquu.networking.packets.PushFilePartsPacket;
 import com.github.shaquu.networking.tcp.TCPCLient;
 import com.github.shaquu.networking.tcp.TCPServer;
 import com.github.shaquu.networking.udp.UDPClientServer;
@@ -14,7 +14,7 @@ import com.github.shaquu.utils.PrimitiveObject;
 
 import java.util.Objects;
 
-public class PullFilePacketListener implements Listener {
+public class PullFilePartsPacketListener implements Listener {
 
     @Override
     public void call(UDPClientServer udpClientServer, IpPort ipPort, Packet packet) throws Exception {
@@ -36,7 +36,8 @@ public class PullFilePacketListener implements Listener {
 
         Byte[] data = PrimitiveObject.toByteArrObject(Packet.toBytes(torroFileWithContent));
 
-        Packet packetToSend = new PushFilePacket(System.currentTimeMillis(), 1, 1, data, ((PullFilePacket) packet).getTorroFile());
+        Packet packetToSend = new PushFilePartsPacket(System.currentTimeMillis()
+                , 1, 1, data, file, ((PullFilePartsPacket) packet).getParts());
         udpClientServer.addPacketToQueue(ipPort, packetToSend);
     }
 
@@ -60,7 +61,8 @@ public class PullFilePacketListener implements Listener {
 
         Byte[] data = PrimitiveObject.toByteArrObject(Packet.toBytes(torroFileWithContent));
 
-        Packet packetToSend = new PushFilePacket(System.currentTimeMillis(), 1, 1, data, ((PullFilePacket) packet).getTorroFile());
+        Packet packetToSend = new PushFilePartsPacket(System.currentTimeMillis()
+                , 1, 1, data, file, ((PullFilePartsPacket) packet).getParts());
         tcpcLient.addPacketToQueue(packetToSend);
     }
 
@@ -68,7 +70,7 @@ public class PullFilePacketListener implements Listener {
         boolean received = networkNode.getPacketManager().add(packet);
 
         if (received) {
-            Packet fullPacket = networkNode.getPacketManager().getPacket(PullFilePacket.class, packet.getId());
+            Packet fullPacket = networkNode.getPacketManager().getPacket(PullFilePartsPacket.class, packet.getId());
 
             byte[] allBytes = PrimitiveObject.toByteArrPrimitive(fullPacket.getData());
 

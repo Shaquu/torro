@@ -34,6 +34,9 @@ public abstract class NetworkNode extends ListenerManager {
         registerListener(new FileListPacketListener());
         registerListener(new PushFilePacketListener());
         registerListener(new PullFilePacketListener());
+        registerListener(new PullFilePartsPacketListener());
+        registerListener(new PushFilePartsPacketListener());
+        registerListener(new LogOnPacketListener());
 
         receiverThread = new Thread(() -> {
             logger.log("Receiver started...");
@@ -148,11 +151,16 @@ public abstract class NetworkNode extends ListenerManager {
         } else if (packet instanceof FileListPacket) {
             return new FileListPacket(packet.getId(), part, maxPart, data);
         } else if (packet instanceof PushFilePacket) {
-            return new PushFilePacket(packet.getId(), part, maxPart, data);
+            return new PushFilePacket(packet.getId(), part, maxPart, data, ((PushFilePacket) packet).getTorroFile());
         } else if (packet instanceof PullFilePacket) {
-            return new PullFilePacket(packet.getId(), part, maxPart, data);
+            return new PullFilePacket(packet.getId(), part, maxPart, data, ((PullFilePacket) packet).getTorroFile());
+        } else if (packet instanceof LogOnPacket) {
+            logger.debug("Packet LogOn chunked. Something is wrong.");
+            return new LogOnPacket(packet.getId());
+        } else if (packet instanceof PullFilePartsPacket) {
+            return new PullFilePartsPacket(packet.getId(), part, maxPart, data, ((PullFilePartsPacket) packet).getParts());
         }
-        logger.debug("Packet type not supported in createPacketChunk.");
+        logger.log("Packet type not supported in createPacketChunk.");
         return null;
     }
 

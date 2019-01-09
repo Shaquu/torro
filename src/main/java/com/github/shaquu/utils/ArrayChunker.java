@@ -1,6 +1,9 @@
 package com.github.shaquu.utils;
 
-public class ArrayChunker {
+import java.util.ArrayList;
+import java.util.List;
+
+public class ArrayChunker<T> {
 
     //based on https://gist.github.com/lesleh/7724554#file-chunkarray-java
     public static Byte[][] forBytes(Byte[] bytes, int chunkSize) {
@@ -17,5 +20,16 @@ public class ArrayChunker {
         }
 
         return output;
+    }
+
+    public List<List<T>> forList(List<T> list, int chunkSize) {
+        List<List<T>> parts = new ArrayList<>();
+        final int N = list.size();
+        for (int i = 0; i < N; i += chunkSize) {
+            parts.add(new ArrayList<>(
+                    list.subList(i, Math.min(N, i + chunkSize)))
+            );
+        }
+        return parts;
     }
 }

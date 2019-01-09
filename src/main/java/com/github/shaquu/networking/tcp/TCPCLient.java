@@ -3,6 +3,7 @@ package com.github.shaquu.networking.tcp;
 import com.github.shaquu.networking.IpPort;
 import com.github.shaquu.networking.NetworkNode;
 import com.github.shaquu.networking.packets.Packet;
+import com.github.shaquu.networking.packets.PushFilePartsPacket;
 import com.github.shaquu.utils.ArrayChunker;
 
 import java.io.DataInputStream;
@@ -103,6 +104,12 @@ public class TCPCLient extends NetworkNode {
             Packet chunkPacket;
 
             for (Byte[] data : chunked) {
+                if (packet instanceof PushFilePartsPacket) {
+                    if (!((PushFilePartsPacket) packet).getParts().contains(part)) {
+                        continue;
+                    }
+                }
+
                 chunkPacket = createPacketChunk(packet, part++, chunked.length, data);
                 packetQueue.add(chunkPacket);
                 logger.debug("Added packet to queue " + Objects.requireNonNull(chunkPacket).getClass().getTypeName() + " " + chunkPacket.toString() + " " + chunkPacket.getPacketSize());

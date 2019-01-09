@@ -8,6 +8,7 @@ import com.github.shaquu.networking.udp.UDPClientServer;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class ListenerManager {
     private List<Listener> listeners = new ArrayList<>();
@@ -22,7 +23,7 @@ public class ListenerManager {
 
     public void notifyListeners(TCPServer tcpServer, TCPCLient tcpcLient, byte[] bytes) throws Exception {
         Packet packet = (Packet) Packet.fromBytes(bytes);
-        tcpServer.getLogger().debug("Received packet " + packet.getClass().getTypeName() + " " + packet.toString());
+        tcpServer.getLogger().debug("Received packet " + Objects.requireNonNull(packet).getClass().getTypeName() + " " + packet.toString());
 
         for (Listener listener : listeners) {
             if (listener instanceof RequestFileListPacketListener) {
@@ -45,15 +46,23 @@ public class ListenerManager {
                 if (packet instanceof LogOnPacket) {
                     listener.call(tcpServer, tcpcLient, packet);
                 }
+            } else if (listener instanceof PullFilePartsPacketListener) {
+                if (packet instanceof PullFilePartsPacket) {
+                    listener.call(tcpServer, tcpcLient, packet);
+                }
+            } else if (listener instanceof PushFilePartsPacketListener) {
+                if (packet instanceof PushFilePartsPacket) {
+                    listener.call(tcpServer, tcpcLient, packet);
+                }
             } else {
-                tcpServer.getLogger().debug("Listener type not supported in notifyListeners");
+                tcpServer.getLogger().debug("TCP Listener type not supported in notifyListeners " + listener.getClass().getTypeName());
             }
         }
     }
 
     protected void notifyListeners(UDPClientServer udpClientServer, IpPort ipPort, byte[] bytes) throws Exception {
         Packet packet = (Packet) Packet.fromBytes(bytes);
-        udpClientServer.getLogger().debug("Received packet " + packet.getClass().getTypeName() + " " + packet.toString());
+        udpClientServer.getLogger().debug("Received packet " + Objects.requireNonNull(packet).getClass().getTypeName() + " " + packet.toString());
 
         for (Listener listener : listeners) {
             if (listener instanceof RequestFileListPacketListener) {
@@ -72,8 +81,20 @@ public class ListenerManager {
                 if (packet instanceof PullFilePacket) {
                     listener.call(udpClientServer, ipPort, packet);
                 }
+            } else if (listener instanceof PullFilePartsPacketListener) {
+                if (packet instanceof PullFilePartsPacket) {
+                    listener.call(udpClientServer, ipPort, packet);
+                }
+            } else if (listener instanceof PushFilePartsPacketListener) {
+                if (packet instanceof PushFilePartsPacket) {
+                    listener.call(udpClientServer, ipPort, packet);
+                }
+            } else if (listener instanceof LogOnPacketListener) {
+                if (packet instanceof LogOnPacket) {
+                    listener.call(udpClientServer, ipPort, packet);
+                }
             } else {
-                udpClientServer.getLogger().debug("Listener type not supported in notifyListeners");
+                udpClientServer.getLogger().debug("UDP Listener type not supported in notifyListeners");
             }
         }
     }

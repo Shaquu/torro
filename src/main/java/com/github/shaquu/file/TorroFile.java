@@ -1,6 +1,7 @@
 package com.github.shaquu.file;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 public class TorroFile implements Serializable {
 
@@ -24,6 +25,21 @@ public class TorroFile implements Serializable {
 
     public String getMd5() {
         return md5;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof TorroFile)) return false;
+        TorroFile torroFile = (TorroFile) o;
+        return getFileSize() == torroFile.getFileSize() &&
+                getFileName().equals(torroFile.getFileName()) &&
+                getMd5().equals(torroFile.getMd5());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getFileName(), getFileSize(), getMd5());
     }
 
     @Override
