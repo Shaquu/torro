@@ -20,7 +20,7 @@ You can also:
 
 # Building jar
 
-  ``` mvn org.apache.maven.plugins:maven-jar-plugin:2.4:jar ```
+  ``` mvn clean package ```
   
 # Running
 
