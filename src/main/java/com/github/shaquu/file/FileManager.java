@@ -18,13 +18,16 @@ public class FileManager {
 
     private final NetworkNode networkNode;
 
-    private HashMap<String, Byte[]> md5toContent = new HashMap<>();
-    private List<TorroFile> fileList = new ArrayList<>();
+    private HashMap<String, Byte[]> md5toContent;
+    private List<TorroFile> fileList;
+
+    private String folderPath;
 
     public FileManager(NetworkNode networkNode, String folderPath) {
         this.networkNode = networkNode;
+        this.folderPath = folderPath;
 
-        this.loadFiles(folderPath);
+        loadFiles();
     }
 
     private static String calculateMd5(byte[] fileContent) throws NoSuchAlgorithmException {
@@ -51,7 +54,10 @@ public class FileManager {
         md5toContent.put(md5, PrimitiveObject.toByteArrObject(fileContent));
     }
 
-    private void loadFiles(String folderPath) {
+    public void loadFiles() {
+        md5toContent = new HashMap<>();
+        fileList = new ArrayList<>();
+
         File folder = new File(folderPath);
 
         if (!folder.exists())

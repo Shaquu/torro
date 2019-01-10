@@ -37,6 +37,8 @@ public class RequestFileListPacketListener implements Listener {
     }
 
     private Packet handler(NetworkNode networkNode) throws IOException {
+        networkNode.getFileManager().loadFiles();
+
         List<TorroFile> fileList = networkNode.getFileManager().getFileList();
 
         networkNode.getLogger().debug("Sending file list: " + Arrays.toString(fileList.toArray()));
