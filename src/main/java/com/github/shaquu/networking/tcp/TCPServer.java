@@ -11,10 +11,7 @@ import com.github.shaquu.utils.ArrayChunker;
 import com.github.shaquu.utils.Utils;
 
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.net.UnknownHostException;
+import java.net.*;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -49,17 +46,40 @@ public class TCPServer extends NetworkNode {
         return clientFileMap;
     }
 
-    void disconnect(long id, InetAddress inetAddress, int port) throws IOException {
-        clientList.remove(id);
+    void disconnect(long id, Socket socket) {
+        try {
+            socket.close();
+            clientList.get(id).getSocket().close();
+            clientList.remove(id);
+        } catch (Exception ignored) {
 
-        IpPort ipPort = new IpPort(inetAddress, port);
+        }
 
-        if (serverList.containsKey(ipPort)) {
-            if (serverList.get(ipPort) != null) {
-                TCPCLient tcpcLient = serverList.get(ipPort);
-                tcpcLient.close();
+        int realPort = ((InetSocketAddress) socket.getRemoteSocketAddress()).getPort();
+        IpPort ipPort = null;
+        try {
+            ipPort = new IpPort(InetAddress.getLocalHost(), realPort);
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
+
+        try {
+
+            if (serverList.containsKey(ipPort)) {
+                if (serverList.get(ipPort) != null) {
+                    TCPCLient tcpcLient = serverList.get(ipPort);
+                    tcpcLient.getSocket().close();
+                }
+                serverList.remove(ipPort);
             }
-            serverList.remove(ipPort);
+        } catch (Exception ignored) {
+
+        }
+
+        try {
+            getIpPortList().remove(ipPort);
+        } catch (Exception ignored) {
+
         }
     }
 
@@ -84,16 +104,20 @@ public class TCPServer extends NetworkNode {
             return false;
         }
 
+        //int realPort = ((InetSocketAddress)server.getRemoteSocketAddress()).getPort();
+
+
         if (server.isConnected()) {
             logger.debug("Connecting to " + port);
             TCPCLient tcpcLient;
             try {
-                tcpcLient = new TCPCLient(-1, server, this);
+                tcpcLient = new TCPCLient(System.currentTimeMillis(), server, this);
             } catch (IOException e) {
                 //System.out.println(e.getLocalizedMessage());
                 server.close();
                 return false;
             }
+
             tcpcLient.start();
 
             serverList.put(ipPort, tcpcLient);
@@ -192,5 +216,9 @@ public class TCPServer extends NetworkNode {
         for (IpPort ipPort : ipPortList) {
             addPacketToQueue(ipPort, packet);
         }
+    }
+
+    public HashMap<IpPort, TCPCLient> getServerList() {
+        return serverList;
     }
 }

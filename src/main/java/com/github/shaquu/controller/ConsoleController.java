@@ -11,10 +11,7 @@ import com.github.shaquu.networking.udp.UDPClientServer;
 import com.github.shaquu.utils.PrimitiveObject;
 import com.github.shaquu.utils.Utils;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 public abstract class ConsoleController {
 
@@ -253,7 +250,11 @@ public abstract class ConsoleController {
         int command;
         do {
             networkNode.getLogger().log(stringBuilder.toString());
-            command = scanner.nextInt();
+            try {
+                command = scanner.nextInt();
+            } catch (NoSuchElementException ignored) {
+                continue;
+            }
 
             if (command == 0) {
                 break;

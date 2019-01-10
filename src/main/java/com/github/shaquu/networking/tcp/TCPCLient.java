@@ -10,6 +10,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.Iterator;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -20,6 +21,8 @@ public class TCPCLient extends NetworkNode {
     private TCPServer tcpServer;
     private DataInputStream inputStream;
     private DataOutputStream outputStream;
+
+    private boolean closing = false;
 
     private long id;
 
@@ -35,28 +38,38 @@ public class TCPCLient extends NetworkNode {
         this.outputStream = new DataOutputStream(socket.getOutputStream());
     }
 
-    void close() throws IOException {
-        //tcpServer.getLogger().debug("Closing connection with " + socket.getInetAddress().getHostName() + " " + socket.getPort());
-        inputStream.close();
-        outputStream.close();
-        socket.close();
-        stop();
+    public TCPServer getTcpServer() {
+        return tcpServer;
+    }
+
+    private void close() throws IOException {
+        if (!closing) {
+            closing = true;
+            inputStream.close();
+            outputStream.close();
+            tcpServer.disconnect(id, socket);
+            stop();
+        }
     }
 
     @Override
     protected void receiver() throws Exception {
         byte[] receiveData = new byte[TCPServer.MESSAGE_SIZE * 10];
 
-        int read = inputStream.read(receiveData);
-
-        if (read == -1) {
-            tcpServer.disconnect(id, socket.getInetAddress(), socket.getPort());
+        int read;
+        try {
+            read = inputStream.read(receiveData);
+        } catch (SocketException e) {
             close();
-            Thread.interrupted();
             return;
         }
 
-        tcpServer.getLogger().debug("Received packet from " + socket.getInetAddress().getHostName() + " " + socket.getPort());
+        if (read == -1) {
+            close();
+            return;
+        }
+
+        tcpServer.getLogger().debug("Received packet from " + socket.getInetAddress().getHostName() + " " + socket.getLocalPort());
         tcpServer.notifyListeners(tcpServer, this, receiveData);
     }
 
@@ -72,7 +85,12 @@ public class TCPCLient extends NetworkNode {
 
                 byte[] sendData = Packet.toBytes(packet);
 
-                outputStream.write(sendData);
+                try {
+                    outputStream.write(sendData);
+                } catch (SocketException e) {
+                    close();
+                    return;
+                }
                 outputStream.flush();
 
                 logger.debug("Send bytes length: " + sendData.length);
@@ -118,6 +136,10 @@ public class TCPCLient extends NetworkNode {
             packetQueue.add(packet);
             logger.debug("Added packet to queue " + packet.getClass().getTypeName() + " " + packet.toString() + " " + packetSize);
         }
+    }
+
+    Socket getSocket() {
+        return socket;
     }
 
     public long getId() {

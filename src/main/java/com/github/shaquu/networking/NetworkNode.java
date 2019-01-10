@@ -44,7 +44,7 @@ public abstract class NetworkNode extends ListenerManager {
                     receiver();
                 } catch (InterruptedException e) {
                     logger.debug("Receiver stopped...");
-                    return;
+                    break;
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -58,7 +58,7 @@ public abstract class NetworkNode extends ListenerManager {
                     sender();
                 } catch (InterruptedException e) {
                     logger.debug("Sender stopped...");
-                    return;
+                    break;
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -79,7 +79,7 @@ public abstract class NetworkNode extends ListenerManager {
                 try {
                     receiver();
                 } catch (InterruptedException e) {
-                    return;
+                    break;
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -91,12 +91,16 @@ public abstract class NetworkNode extends ListenerManager {
                 try {
                     sender();
                 } catch (InterruptedException e) {
-                    return;
+                    break;
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
         });
+    }
+
+    public List<IpPort> getIpPortList() {
+        return ipPortList;
     }
 
     public ConsoleController getConsoleController() {

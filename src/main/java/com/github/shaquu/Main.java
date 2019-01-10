@@ -15,8 +15,6 @@ import java.util.List;
 
 public class Main {
 
-    private static int[] ports = new int[]{10004, 10005};
-
     //for udp with debug
     //java -jar target/torro-1.0-SNAPSHOT.jar true true 10001 10001 10002 10003
 
@@ -70,21 +68,16 @@ public class Main {
                         }
 
                         if (connected) {
-                            System.out.println("Connected to " + port);
                             iterator.remove();
                         }
 
                         try {
-                            Thread.sleep(TCPServer.WAIT_TIME);
+                            Thread.sleep(TCPServer.WAIT_TIME * 50);
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
 
-                        if (toJoin.size() == 0) {
-                            break;
-                        }
-
-                        if (!iterator.hasNext()) {
+                        if (toJoin.size() == 0 || !iterator.hasNext()) {
                             toJoin = new ArrayList<>(theirPorts);
                             iterator = toJoin.iterator();
                         }
