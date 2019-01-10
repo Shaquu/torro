@@ -265,7 +265,7 @@ public abstract class ConsoleController {
         } while (true);
     }
 
-    private void requestFileList() throws Exception {
+    public void requestFileList() throws Exception {
         networkNode.getLogger().log("Requesting file list...");
 
         Packet packet = new RequestFileListPacket(System.currentTimeMillis());

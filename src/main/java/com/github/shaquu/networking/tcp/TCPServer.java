@@ -15,12 +15,15 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Objects;
 
 public class TCPServer extends NetworkNode {
 
-    public final static int WAIT_TIME = 1000;
-    final static int MESSAGE_SIZE = 2048;
+    public final static int WAIT_TIME = 100;
+    final static int MESSAGE_SIZE = 4096;
     private ServerSocket server;
 
     private HashMap<Long, TCPCLient> clientList = new HashMap<>();
@@ -69,6 +72,10 @@ public class TCPServer extends NetworkNode {
             return false;
         }
 
+        if (serverList.containsKey(ipPort)) {
+            return true;
+        }
+
         Socket server;
         try {
             server = new Socket(InetAddress.getLocalHost(), port);
@@ -78,7 +85,7 @@ public class TCPServer extends NetworkNode {
         }
 
         if (server.isConnected()) {
-            System.out.println("Connecting to " + port);
+            logger.debug("Connecting to " + port);
             TCPCLient tcpcLient;
             try {
                 tcpcLient = new TCPCLient(-1, server, this);
@@ -102,7 +109,7 @@ public class TCPServer extends NetworkNode {
     @Override
     protected void receiver() throws Exception {
         Socket client = server.accept();
-        System.out.println("Client connected " + client);
+        logger.log("Client connected " + client);
 
         long id = System.currentTimeMillis();
         TCPCLient tcpcLient = new TCPCLient(id, client, this);
@@ -133,7 +140,7 @@ public class TCPServer extends NetworkNode {
 
                 if (tcpcLient != null) {
                     tcpcLient.addPacketToQueue(packet);
-                    logger.debug(new Date() + "|Send bytes length: " + sendData.length);
+                    logger.debug("Send bytes length: " + sendData.length);
                 }
 
             }

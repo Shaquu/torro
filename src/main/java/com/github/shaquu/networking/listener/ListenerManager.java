@@ -17,10 +17,6 @@ public class ListenerManager {
         listeners.add(listener);
     }
 
-    protected void unregisterListener(Listener listener) {
-        listeners.remove(listener);
-    }
-
     public void notifyListeners(TCPServer tcpServer, TCPCLient tcpcLient, byte[] bytes) throws Exception {
         Packet packet = (Packet) Packet.fromBytes(bytes);
         tcpServer.getLogger().debug("Received packet " + Objects.requireNonNull(packet).getClass().getTypeName() + " " + packet.toString());

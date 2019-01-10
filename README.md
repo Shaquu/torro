@@ -16,9 +16,30 @@ You can also:
   - Resume file downloading
   - Download one file from many hosts at once (different chunk from different host)
 
-# Building
+# Building jar
 
+  ``` mvn org.apache.maven.plugins:maven-jar-plugin:2.4:jar ```
+  
 # Running
+
+## Manualy
+### UDP
+
+  ``` java -jar torro-<version>.jar <debug mode true/false> true <port> <folder path> <other hosts ports delimeted by space> ```
+  
+  For example
+  
+  ``` java -jar torro-<version>.jar false true 10001 TORrent_1 10002 10003 ```
+
+### TCP
+
+  ``` java -jar torro-<version>.jar <debug mode true/false> false <port> <folder path> <other hosts ports delimeted by space> ```
+  
+  For example
+  
+  ``` java -jar torro-<version>.jar false false 10001 TORrent_1 10002 10003 ```
+
+## Via prepared scripts
 
 License
 ----

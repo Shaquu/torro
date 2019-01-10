@@ -10,10 +10,10 @@ import com.github.shaquu.networking.tcp.TCPServer;
 import com.github.shaquu.networking.udp.UDPClientServer;
 import com.github.shaquu.utils.PrimitiveObject;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 public class FileListPacketListener implements Listener {
 
@@ -22,6 +22,7 @@ public class FileListPacketListener implements Listener {
         List<TorroFile> fileList = (List<TorroFile>) handler(udpClientServer, packet);
 
         if (fileList != null) {
+            udpClientServer.getLogger().log("Files of client " + ipPort);
             udpClientServer.addClienFileList(ipPort, fileList);
         }
     }
@@ -31,11 +32,12 @@ public class FileListPacketListener implements Listener {
         List<TorroFile> fileList = (List<TorroFile>) handler(tcpServer, packet);
 
         if (fileList != null) {
+            tcpServer.getLogger().log("Files of client " + tcpcLient);
             tcpServer.addClienFileList(tcpcLient.getId(), fileList);
         }
     }
 
-    private Object handler(NetworkNode networkNode, Packet packet) throws IOException, ClassNotFoundException {
+    private Object handler(NetworkNode networkNode, Packet packet) throws ClassNotFoundException {
         boolean received = networkNode.getPacketManager().add(packet);
 
         if (received) {
@@ -46,7 +48,7 @@ public class FileListPacketListener implements Listener {
 
             List<TorroFile> fileList = (ArrayList<TorroFile>) Packet.fromBytes(allBytes);
 
-            networkNode.getLogger().debug(Arrays.toString(fileList.toArray()));
+            networkNode.getLogger().log(Arrays.toString(Objects.requireNonNull(fileList).toArray()));
 
             return fileList;
         }

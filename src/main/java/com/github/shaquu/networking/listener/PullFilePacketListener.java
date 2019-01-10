@@ -32,7 +32,7 @@ public class PullFilePacketListener implements Listener {
                         udpClientServer.getFileManager().getFileContent(file.getMd5())
                 );
 
-        udpClientServer.getLogger().log("Pushing file to client");
+        udpClientServer.getLogger().log("Pushing file to client " + file.toString());
 
         Byte[] data = PrimitiveObject.toByteArrObject(Packet.toBytes(torroFileWithContent));
 
@@ -56,7 +56,7 @@ public class PullFilePacketListener implements Listener {
                         tcpServer.getFileManager().getFileContent(file.getMd5())
                 );
 
-        tcpServer.getLogger().log("Pushing file to client");
+        tcpServer.getLogger().log("Pushing file to client " + file.toString());
 
         Byte[] data = PrimitiveObject.toByteArrObject(Packet.toBytes(torroFileWithContent));
 

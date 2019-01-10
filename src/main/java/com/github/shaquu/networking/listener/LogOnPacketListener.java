@@ -21,5 +21,13 @@ public class LogOnPacketListener implements Listener {
 
     private void handler(NetworkNode networkNode, Packet packet) {
         networkNode.getPacketManager().add(packet);
+
+        if (networkNode.getConsoleController() != null) {
+            try {
+                networkNode.getConsoleController().requestFileList();
+            } catch (Exception e) {
+                networkNode.getLogger().debug(e.getMessage());
+            }
+        }
     }
 }

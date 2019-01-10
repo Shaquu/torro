@@ -60,13 +60,18 @@ public class FileManager {
 
         File folder = new File(folderPath);
 
-        if (!folder.exists())
+        if (!folder.exists()) {
+            folder.mkdirs();
             return;
+        }
 
         File[] listFiles = folder.listFiles();
 
         assert listFiles != null;
         for (File file : listFiles) {
+            if (file.getName().equalsIgnoreCase("lock"))
+                continue;
+
             try {
                 add(file);
             } catch (IOException | NoSuchAlgorithmException e) {

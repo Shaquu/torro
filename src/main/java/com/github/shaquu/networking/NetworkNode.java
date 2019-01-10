@@ -22,7 +22,6 @@ public abstract class NetworkNode extends ListenerManager {
     private FileManager fileManager;
     private String folderPath;
     private ConsoleController consoleController;
-
     protected NetworkNode(int port, String folderPath) {
         this.port = port;
         this.folderPath = folderPath;
@@ -39,12 +38,12 @@ public abstract class NetworkNode extends ListenerManager {
         registerListener(new LogOnPacketListener());
 
         receiverThread = new Thread(() -> {
-            logger.log("Receiver started...");
+            logger.debug("Receiver started...");
             while (true) {
                 try {
                     receiver();
                 } catch (InterruptedException e) {
-                    logger.log("Receiver stopped...");
+                    logger.debug("Receiver stopped...");
                     return;
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -53,12 +52,12 @@ public abstract class NetworkNode extends ListenerManager {
         });
 
         senderThread = new Thread(() -> {
-            logger.log("Sender started...");
+            logger.debug("Sender started...");
             while (true) {
                 try {
                     sender();
                 } catch (InterruptedException e) {
-                    logger.log("Sender stopped...");
+                    logger.debug("Sender stopped...");
                     return;
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -98,6 +97,10 @@ public abstract class NetworkNode extends ListenerManager {
                 }
             }
         });
+    }
+
+    public ConsoleController getConsoleController() {
+        return consoleController;
     }
 
     public void stop() {

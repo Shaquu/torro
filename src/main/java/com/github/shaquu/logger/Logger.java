@@ -8,11 +8,11 @@ public class Logger {
 
     public void debug(String message) {
         if (DEBUG)
-            System.out.println(new Date() + " | " + message);
+            System.out.println(new Date() + " D " + message);
     }
 
     public void log(String message) {
-        System.out.println(new Date() + " | " + message);
+        System.out.println(new Date() + " L " + message);
     }
 
 }

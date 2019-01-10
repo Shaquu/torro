@@ -58,7 +58,7 @@ public class Main {
 
                     Iterator<Integer> iterator = toJoin.iterator();
 
-                    while (iterator.hasNext()) {
+                    while (true) {
                         boolean connected = false;
 
                         int port = iterator.next();
@@ -85,6 +85,7 @@ public class Main {
                         }
 
                         if (!iterator.hasNext()) {
+                            toJoin = new ArrayList<>(theirPorts);
                             iterator = toJoin.iterator();
                         }
                     }

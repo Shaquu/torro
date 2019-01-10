@@ -13,12 +13,15 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Objects;
 
 public class UDPClientServer extends NetworkNode {
 
-    private final static int MESSAGE_SIZE = 1024;
-    private final static int WAIT_TIME = 1000;
+    private final static int MESSAGE_SIZE = 2048;
+    private final static int WAIT_TIME = 100;
 
     private final DatagramSocket serverSocket;
 
@@ -62,7 +65,7 @@ public class UDPClientServer extends NetworkNode {
 
                 serverSocket.send(sendPacket);
 
-                logger.debug(new Date() + "|Send bytes length: " + sendData.length);
+                logger.debug("Send bytes length: " + sendData.length);
                 Thread.sleep(WAIT_TIME);
             }
         }
