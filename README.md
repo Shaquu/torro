@@ -40,6 +40,10 @@ You can also:
   ``` java -jar torro-<version>.jar false false 10001 TORrent_1 10002 10003 ```
 
 ## Via prepared scripts
+### Linux
+Follow subfolders in run_scripts folder and run script in terminal.
+### Windows
+Follow subfolders in run_scripts folder and run script in git bash.
 
 License
 ----
