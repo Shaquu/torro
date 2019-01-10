@@ -97,6 +97,7 @@ private final int maxPart; //Max file part (if packet is not chunked then its 1)
 
 private Byte[] data; //Some data 
 ```
+
 ##FileListPacket
 Packet contains list of host(H1) files. Host(H2) which receives this packet will now know what files are on other host(H1).
 
