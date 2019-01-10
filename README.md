@@ -87,6 +87,7 @@ Host which receive chunks will wait until he receives all chunks and then will c
   > Other hosts(O1) looks for file in their folders and if found then they build PushFilePacket and send it to H1.
   > When H1 receives packet then he load packet and read file from it.
   
+
 ##Packet
 Base packet which is Serializable. Contains methods to pack packet into byte array or load packet from byte array.
 
@@ -102,22 +103,28 @@ private Byte[] data; //Some data
 Packet contains list of host(H1) files. Host(H2) which receives this packet will now know what files are on other host(H1).
 
 List with files is written to byte array.
+
 ##LogOnPacket
 Packet is sent in TCP mode only on first connection. It's just a ping packet.
+
 ##PullFilePacket
 Packet contains file description of file we want to get from remote host(H1). 
 Remote host(H1) will receive this packet and if he has the file then will build PushFilePacket containing file data.
+
 ##PullFilePartsPacket
 The same like PullFilePacket but with specified chunk numbers we want to pull.
 
 ``` List<Integer> pargs; //Chunk parts ```
+
 ##PushFilePacket
 Packet contains file content. It is sent from host(H1) to remote host(H2). 
 When remote host(H2) receive this packet then he will get byte array and deserialize it into file.
+
 ##PushFilePartsPacket
 The same like PushFilePacket but with specified chunk numbers we want to push.
 
 ``` List<Integer> pargs; //Chunk parts ```
+
 ##RequestFileListPacket
 Packet which ticks remote host(H1) to send us(H2) his list of files.
 
