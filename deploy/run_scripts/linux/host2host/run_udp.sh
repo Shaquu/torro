@@ -56,7 +56,7 @@ otherPorts=$(getClientNumbers ${myNumber})
 echo "Other client ports ${otherPorts}";
 
 
-java -jar ../../../torro-1.0-SNAPSHOT.jar false true ${myPort} ${myFolder} ${otherPorts};
+java -jar ../../../torro-1.1-SNAPSHOT.jar false true ${myPort} ${myFolder} ${otherPorts};
 
 rm "$myFolder/lock";
 

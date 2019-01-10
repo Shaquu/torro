@@ -16,7 +16,7 @@ import java.util.List;
 public class Main {
 
     //for udp with debug
-    //java -jar target/torro-1.0-SNAPSHOT.jar true true 10001 10001 10002 10003
+    //java -jar target/torro-1.1-SNAPSHOT.jar true true 10001 10001 10002 10003
 
     public static void main(String[] args) throws Exception {
 
