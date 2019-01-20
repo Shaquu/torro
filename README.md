@@ -131,4 +131,4 @@ Packet which ticks remote host(H1) to send us(H2) his list of files.
 License
 ----
 
-MIT
+MIT but it's not recommended to use any significant part of code from there in your own one (at least at PJATK) to not trigger plagiarism (I don't care how you use it but some poeple care ;) )
